@@ -6,90 +6,10 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-
-import UserContext, {withUser} from "../../contexts/user/user.context";
 import Button from "@material-ui/core/Button";
 
-async function getUser(userId, { token }) {
-  const userResponse = await fetch(
-    `${process.env.REACT_APP_NEXUS_API_ENDPOINT}/users/${userId}`,
-    {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    },
-  );
-
-  if (!userResponse.ok) {
-    console.error(await userResponse.json());
-    throw new Error('Could not fetch user');
-  }
-
-  const user = await userResponse.json();
-
-  return user;
-}
-
-async function getCalendars({ token }) {
-  const calendarsResponse = await fetch(
-    `${process.env.REACT_APP_NEXUS_API_ENDPOINT}/calendars`,
-    {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    },
-  );
-
-  if (!calendarsResponse.ok) {
-    console.error(await calendarsResponse.json());
-    throw new Error('Could not fetch calendars');
-  }
-
-  const calendars = await calendarsResponse.json();
-
-  return calendars;
-}
-
-async function getCalendarKeys(calendarId, { token }) {
-  const calendarKeysResponse = await fetch(
-    `${process.env.REACT_APP_NEXUS_API_ENDPOINT}/calendars/${calendarId}/keys`,
-    {
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    },
-  );
-
-  if (!calendarKeysResponse.ok) {
-    console.error(await calendarKeysResponse.json());
-    throw new Error('Could not retrieve calendar keys.');
-  }
-
-  const calendarKeys = await calendarKeysResponse.json();
-
-  return calendarKeys;
-}
-
-async function createCalendarKey(calendarId, { token }) {
-  const calendarKeyResponse = await fetch(
-    `${process.env.REACT_APP_NEXUS_API_ENDPOINT}/calendars/${calendarId}/keys`,
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-      },
-    },
-  );
-
-  if (!calendarKeyResponse.ok) {
-    console.error(await calendarKeyResponse.json());
-    throw new Error('Could not create calendar keys.');
-  }
-
-  const calendarKey = await calendarKeyResponse.json();
-
-  return calendarKey;
-}
+import UserContext, {withUser} from "../../contexts/user/user.context";
+import * as NexusApi from "../../services/nexus-api/nexus-api.service";
 
 function Settings() {
   const userContext = React.useContext(UserContext);
@@ -107,8 +27,8 @@ function Settings() {
     }
 
     userContext.getToken().then(async token => {
-      setUser(await getUser(userContext.userId, { token }));
-      setCalendars(await getCalendars({ token }));
+      setUser(await NexusApi.getUser(userContext.userId, { token }));
+      setCalendars(await NexusApi.getCalendars({ token }));
       setLoaded(true);
     });
   }, [userContext, setLoaded]);
@@ -116,7 +36,7 @@ function Settings() {
   async function generateExportUrl(calendarId, calendarShortUrl) {
     try {
       const token = await userContext.getToken();
-      const existingCalendarKeys = await getCalendarKeys(calendarId, { token });
+      const existingCalendarKeys = await NexusApi.getCalendarKeys(calendarId, { token });
 
       if (existingCalendarKeys.length > 0) {
         const key = existingCalendarKeys[0];
@@ -125,7 +45,7 @@ function Settings() {
         return;
       }
 
-      const key = await createCalendarKey(calendarId, { token });
+      const key = await NexusApi.createCalendarKey(calendarId, { token });
       setKeyUrl(`${process.env.REACT_APP_NEXUS_API_ENDPOINT}/calendars/${key.calendar.shortUrl}/${key.key}/calendar.ics`);
       setShowNewKeyDialog(true);
     } catch (error) {

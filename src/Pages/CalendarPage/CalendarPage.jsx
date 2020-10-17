@@ -5,6 +5,7 @@ import 'tui-calendar/dist/tui-calendar.css';
 import 'tui-date-picker/dist/tui-date-picker.css';
 import 'tui-time-picker/dist/tui-time-picker.css';
 import UserContext, {withUser} from "../../contexts/user/user.context";
+import * as NexusAPI from "../../services/nexus-api/nexus-api.service";
 
 function CalendarPage() {
   const userContext = useContext(UserContext);
@@ -15,6 +16,11 @@ function CalendarPage() {
         return [...state, action.schedule];
       case 'set':
         return action.schedules;
+      case 'remove':
+        const newSate = [...state];
+        newSate.splice(newSate.indexOf(schedule => schedule.id === action.id), 1);
+
+        return [...newSate];
       default:
         throw new Error('unknown dispatchSchedules action type');
     }
@@ -169,6 +175,27 @@ function CalendarPage() {
     }
   }
 
+  async function deleteSchedule({ schedule }) {
+    try {
+      if (!userContext.authenticated) {
+        alert('You must be authenticated to remove an event.');
+        return;
+      }
+
+      const token = await userContext.getToken();
+
+      await NexusAPI.deleteEvent(schedule.id, { token });
+
+      dispatchSchedules({
+        type: 'remove',
+        id: schedule.id,
+      });
+    } catch (error) {
+      console.error(error);
+      alert('Could not delete event.');
+    }
+  }
+
   async function connectWithDiscord() {
     await userContext.connectWithDiscord();
   }
@@ -247,6 +274,7 @@ function CalendarPage() {
           }
         }}
         onBeforeCreateSchedule={createSchedule}
+        onBeforeDeleteSchedule={deleteSchedule}
       />
     </>
   )
