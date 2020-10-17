@@ -5,7 +5,7 @@ import { withRouter, useLocation, Redirect } from "react-router-dom";
 
 function RedirectPage() {
   const location = useLocation();
-  const userContext = useContext(UserContext);
+  const { authenticated, finalizeDiscordAuthentication } = useContext(UserContext);
 
   const [error, setError] = React.useState(false)
 
@@ -14,18 +14,18 @@ function RedirectPage() {
     const code = locationParams.get('code');
     const state = locationParams.get('state');
 
-    userContext.finalizeDiscordAuthentication({ code, state })
+    finalizeDiscordAuthentication({ code, state })
       .catch((error) => {
         console.log('here');
         console.error(error);
         setError(true);
       });
-  }, [location.search]);
+  }, [location.search, finalizeDiscordAuthentication]);
 
   return (
     <>
       {error && <Redirect to="/" />}
-      {userContext.authenticated && <Redirect to="/" />}
+      {authenticated && <Redirect to="/" />}
       <h1>Validating authentication...</h1>
     </>
   )

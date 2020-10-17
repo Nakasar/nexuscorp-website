@@ -41,6 +41,7 @@ function CalendarPage() {
         schedules,
       });
     });
+  // eslint-disable-next-line
   }, [userContext.initialized, userContext.authenticated]);
 
   async function fetchEvents() {

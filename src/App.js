@@ -7,10 +7,11 @@ import UserContext, {withUser} from "./contexts/user/user.context";
 
 
 function App() {
-  const userContext = useContext(UserContext);
+  const { attemptRecoverAuthentication } = useContext(UserContext);
+
   useEffect(() => {
-    userContext.attemptRecoverAuthentication();
-  }, [])
+    attemptRecoverAuthentication();
+  }, [attemptRecoverAuthentication])
 
   return (
     <>
