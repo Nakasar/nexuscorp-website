@@ -35,76 +35,75 @@ function CalendarPage() {
       return;
     }
 
+    async function fetchEvents() {
+      const headers = {};
+
+      if (userContext.authenticated) {
+        const token = await userContext.getToken();
+
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+      }
+
+      const calendarsResponse = await fetch(
+        `${process.env.REACT_APP_NEXUS_API_ENDPOINT}/calendars`,
+        {
+          headers: {
+            ...headers,
+          },
+        },
+      );
+
+      if (!calendarsResponse.ok) {
+        console.error("Could not get calendars.");
+        return;
+      }
+      const calendarsRetrieved = await calendarsResponse.json();
+
+      dispatchCalendars({
+        type: 'set',
+        calendars: calendarsRetrieved,
+      });
+
+      const events = [];
+
+      for (const calendar of calendarsRetrieved) {
+        const eventsResponse = await fetch(
+          `https://nexus-calendar.glitch.me/calendars/${calendar.id}/events`,
+          {
+            headers: { ...headers },
+          }
+        );
+
+        if (!eventsResponse.ok) {
+          console.error("Could not get calendar.");
+          return;
+        }
+
+        const eventsRetrieved = await eventsResponse.json();
+
+        events.push(...eventsRetrieved.map(event => ({
+          id: event.id,
+          calendarId: event.calendar.id,
+          title: event.title,
+          category: "time",
+          dueDateClass: "",
+          start: event.start,
+          end: event.end
+        })));
+      }
+
+      return events;
+    }
+
     fetchEvents().then(schedules => {
       dispatchSchedules({
         type: 'set',
         schedules,
       });
     });
-  // eslint-disable-next-line
-  }, [userContext.initialized, userContext.authenticated]);
-
-  async function fetchEvents() {
-    const headers = {};
-
-    if (userContext.authenticated) {
-        const token = await userContext.getToken();
-
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
-        }
-    }
-
-    const calendarsResponse = await fetch(
-      `${process.env.REACT_APP_NEXUS_API_ENDPOINT}/calendars`,
-      {
-        headers: {
-          ...headers,
-        },
-      },
-    );
-
-    if (!calendarsResponse.ok) {
-      console.error("Could not get calendars.");
-      return;
-    }
-    const calendarsRetrieved = await calendarsResponse.json();
-
-    dispatchCalendars({
-      type: 'set',
-      calendars: calendarsRetrieved,
-    });
-
-    const events = [];
-
-    for (const calendar of calendarsRetrieved) {
-      const eventsResponse = await fetch(
-        `https://nexus-calendar.glitch.me/calendars/${calendar.id}/events`,
-        {
-          headers: { ...headers },
-        }
-      );
-
-      if (!eventsResponse.ok) {
-        console.error("Could not get calendar.");
-        return;
-      }
-
-      const eventsRetrieved = await eventsResponse.json();
-
-      events.push(...eventsRetrieved.map(event => ({
-        id: event.id,
-        calendarId: event.calendar.id,
-        title: event.title,
-        category: "time",
-        dueDateClass: "",
-        start: event.start,
-        end: event.end
-      })));
-    }
-
-    return events;
-  }
+  }, [userContext]);
 
   async function createEvent(calendarId, event) {
     const calendar = calendars.find(c => c.id === calendarId);
