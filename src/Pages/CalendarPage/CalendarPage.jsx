@@ -195,6 +195,35 @@ function CalendarPage() {
         useCreationPopup={true}
         useDetailPopup={true}
         schedules={schedules}
+        theme={{
+          // Common
+          'common.border': '1px solid #25cef0',
+          'common.backgroundColor': '#021a48',
+          'common.holiday.color': '#25cef0',
+          'common.saturday.color': '#25cef0',
+          'common.dayname.color': '#25cef0',
+          'common.today.color': '#a0eaf9',
+
+          // creation guide style
+          'common.creationGuide.backgroundColor': 'rgba(81, 92, 230, 0.05)',
+          'common.creationGuide.border': '1px solid #515ce6',
+
+          // month header 'dayname'
+          'month.dayname.height': '31px',
+          'month.dayname.borderLeft': '1px solid #a0eaf9',
+          'month.dayname.paddingLeft': '10px',
+          'month.dayname.paddingRight': '10px',
+          'month.dayname.backgroundColor': '#113d8c',
+          'month.dayname.fontSize': '12px',
+          'month.dayname.fontWeight': 'normal',
+          'month.dayname.textAlign': 'left',
+
+          // month day grid cell 'day'
+          'month.holidayExceptThisMonth.color': 'rgba(37, 206, 240, 0.4)',
+          'month.dayExceptThisMonth.color': 'rgba(37, 206, 240, 0.4)',
+          'month.weekend.backgroundColor': 'inherit',
+          'month.day.fontSize': '14px',
+        }}
         calendars={calendars.map(calendar => ({
           id: calendar.id,
           name: calendar.name,
@@ -211,8 +240,8 @@ function CalendarPage() {
             const html = [];
 
             const [hours, minutes] = schedule.start.toDate().toLocaleTimeString().split(':');
-            html.push(`<strong>${hours}:${minutes}</strong>`);
-            html.push(" " + schedule.title);
+            html.push(`<strong style="color: #a0eaf9;">${hours}:${minutes}</strong>`);
+            html.push(` <span style="color: #a0eaf9;">${schedule.title}</span>`);
 
             return html.join("");
           }
