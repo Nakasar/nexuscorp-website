@@ -37,12 +37,12 @@ function UserContextProvider(props) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          origin: 'http://localhost:3000',
-          redirectUri: 'http://localhost:3000/redirect',
+          origin: process.env.REACT_APP_DOMAIN,
+          redirectUri: `${process.env.REACT_APP_DOMAIN}/redirect`,
         }),
       }).then(res => res.json());
 
-    window.location = `https://discord.com/api/oauth2/authorize?client_id=736495315393445978&redirect_uri=http%3A%2F%2Flocalhost:3000%2Fredirect&response_type=code&scope=identify&state=${authRequest.state}`;
+    window.location = `https://discord.com/api/oauth2/authorize?client_id=736495315393445978&redirect_uri=${encodeURIComponent(`${process.env.REACT_APP_DOMAIN}/redirect`)}&response_type=code&scope=identify&state=${authRequest.state}`;
   }
 
   async function disconnect() {
