@@ -6,6 +6,7 @@ function UserContextProvider(props) {
   const [authenticated, setAuthenticated] = React.useState(false);
   const [initialized, setInitialized] = React.useState(false);
   const [token, setToken] = React.useState(null);
+  const [userId, setUserId] = React.useState(null);
 
   async function attemptRecoverAuthentication() {
     if (window.localStorage) {
@@ -19,6 +20,7 @@ function UserContextProvider(props) {
 
           if (tokenExpiresAt > new Date()) {
             setToken(token);
+            setUserId(payload.sub);
             setAuthenticated(true);
           }
         } catch {}
@@ -94,6 +96,7 @@ function UserContextProvider(props) {
     // Variables
     authenticated,
     initialized,
+    userId,
     // Methods
     attemptRecoverAuthentication,
     connectWithDiscord,
